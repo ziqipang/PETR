@@ -83,7 +83,7 @@ class Petr3D(MVXTwoStageDetector):
             img_feats_reshaped.append(img_feat.view(B, int(BN / B), C, H, W))
         return img_feats_reshaped
 
-    @auto_fp16(apply_to=('img'), out_fp32=True)
+    # @auto_fp16(apply_to=('img'), out_fp32=True)
     def extract_feat(self, img, img_metas):
         """Extract features from images and points."""
         img_feats = self.extract_img_feat(img, img_metas)

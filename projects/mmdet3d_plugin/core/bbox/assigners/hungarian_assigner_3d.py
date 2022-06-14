@@ -127,7 +127,7 @@ class HungarianAssigner3D(BaseAssigner):
         if linear_sum_assignment is None:
             raise ImportError('Please run "pip install scipy" '
                               'to install scipy first.')
-        cost = torch.nan_to_num(cost, nan=100.0, posinf=100.0, neginf=-100.0)
+        cost = nan_to_num(cost, nan=100.0, posinf=100.0, neginf=-100.0)
         matched_row_inds, matched_col_inds = linear_sum_assignment(cost)
         matched_row_inds = torch.from_numpy(matched_row_inds).to(
             bbox_pred.device)
@@ -142,3 +142,12 @@ class HungarianAssigner3D(BaseAssigner):
         assigned_labels[matched_row_inds] = gt_labels[matched_col_inds]
         return AssignResult(
             num_gts, assigned_gt_inds, None, labels=assigned_labels)
+
+
+def nan_to_num(x, nan=0.0, posinf=None, neginf=None):
+    x[torch.isnan(x)]= nan
+    if posinf is not None:
+        x[torch.isposinf(x)] = posinf
+    if neginf is not None:
+        x[torch.isneginf(x)] = posinf
+    return x

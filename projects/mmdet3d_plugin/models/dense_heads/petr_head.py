@@ -417,7 +417,7 @@ class PETRHead(AnchorFreeHead):
         reference_points = reference_points.unsqueeze(0).repeat(batch_size, 1, 1) #.sigmoid()
 
         outs_dec, _ = self.transformer(x, masks, query_embeds, pos_embed, self.reg_branches)
-        outs_dec = torch.nan_to_num(outs_dec)
+        outs_dec = nan_to_num(outs_dec)
         outputs_classes = []
         outputs_coords = []
         for lvl in range(outs_dec.shape[0]):
@@ -622,8 +622,8 @@ class PETRHead(AnchorFreeHead):
         loss_bbox = self.loss_bbox(
                 bbox_preds[isnotnan, :10], normalized_bbox_targets[isnotnan, :10], bbox_weights[isnotnan, :10], avg_factor=num_total_pos)
 
-        loss_cls = torch.nan_to_num(loss_cls)
-        loss_bbox = torch.nan_to_num(loss_bbox)
+        loss_cls = nan_to_num(loss_cls)
+        loss_bbox = nan_to_num(loss_bbox)
         return loss_cls, loss_bbox
     
     @force_fp32(apply_to=('preds_dicts'))
@@ -732,3 +732,12 @@ class PETRHead(AnchorFreeHead):
             labels = preds['labels']
             ret_list.append([bboxes, scores, labels])
         return ret_list
+
+
+def nan_to_num(x, nan=0.0, posinf=None, neginf=None):
+    x[torch.isnan(x)]= nan
+    if posinf is not None:
+        x[torch.isposinf(x)] = posinf
+    if neginf is not None:
+        x[torch.isneginf(x)] = posinf
+    return x

@@ -337,8 +337,8 @@ class Detr3DHead(DETRHead):
         loss_bbox = self.loss_bbox(
                 bbox_preds[isnotnan, :10], normalized_bbox_targets[isnotnan, :10], bbox_weights[isnotnan, :10], avg_factor=num_total_pos)
 
-        loss_cls = torch.nan_to_num(loss_cls)
-        loss_bbox = torch.nan_to_num(loss_bbox)
+        loss_cls = nan_to_num(loss_cls)
+        loss_bbox = nan_to_num(loss_bbox)
         return loss_cls, loss_bbox
     
     @force_fp32(apply_to=('preds_dicts'))
@@ -447,3 +447,12 @@ class Detr3DHead(DETRHead):
             labels = preds['labels']
             ret_list.append([bboxes, scores, labels])
         return ret_list
+
+
+def nan_to_num(x, nan=0.0, posinf=None, neginf=None):
+    x[torch.isnan(x)]= nan
+    if posinf is not None:
+        x[torch.isposinf(x)] = posinf
+    if neginf is not None:
+        x[torch.isneginf(x)] = posinf
+    return x
